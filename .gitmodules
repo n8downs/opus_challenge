@@ -1,0 +1,3 @@
+[submodule "third-party/requests"]
+	path = third-party/requests
+	url = git://github.com/kennethreitz/requests.git
