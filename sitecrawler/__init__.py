@@ -13,6 +13,7 @@ class SiteCrawler:
 
     def __parseContents(self, url):
         parsed = {"assets": [], "links": []}
+        return parsed
 
     def map(self):
         siteMap = {}
