@@ -30,6 +30,7 @@ class FakeRequests:
         if not response:
             raise Exception("No request expectation set for: '%s'" % (url,))
 
+        del self._expectations[url]    
         return response
 
 class FakeServiceProvider(ServiceProvider):

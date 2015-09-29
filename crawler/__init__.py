@@ -1,4 +1,4 @@
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urldefrag, urlparse
 from html.parser import HTMLParser
 
 class MyHTMLParser(HTMLParser):
@@ -41,17 +41,29 @@ class Crawler:
         parser = MyHTMLParser()
         parser.feed(response.text)
 
+        for link in parser.links:
+            url, fragment = urldefrag(urljoin(url, link))
+            self.__urlsToFetch.append(url)
+
         return {"assets": parser.assets, "links": parser.links}
 
     def map(self):
         siteMap = {}
 
+        parsedDomain = urlparse(self.__domain)
         self.__urlsToFetch.append(self.__domain)
 
         while self.__urlsToFetch:
             url = self.__urlsToFetch.pop()
 
             if url in siteMap.keys():
+                continue
+
+            parsedUrl = urlparse(url)
+            if parsedUrl.scheme not in ['http', 'https']:
+                continue
+
+            if parsedDomain.netloc != parsedUrl.netloc:
                 continue
 
             if not self.__robotParser.can_fetch(self.__USER_AGENT, url):
