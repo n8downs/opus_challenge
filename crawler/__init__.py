@@ -1,6 +1,5 @@
 from urllib.parse import urljoin
 from html.parser import HTMLParser
-import requests
 
 class MyHTMLParser(HTMLParser):
     def __init__(self):
@@ -19,7 +18,7 @@ class MyHTMLParser(HTMLParser):
                 self.links.append(link)
 
 
-class SiteCrawler:
+class Crawler:
     __USER_AGENT = 'SiteCrawlerBot/0.1'
 
     def __init__(self, svc, domain):
@@ -31,7 +30,7 @@ class SiteCrawler:
         self.__robotParser.read()
 
     def __parseContents(self, url):
-        response = requests.get(url, headers={"User-Agent": self.__USER_AGENT, "Accept": "text/html"})
+        response = self.__svc.get('requests').get(url, headers={"User-Agent": self.__USER_AGENT, "Accept": "text/html"})
         if response.status_code >= 400:
             pass
             #return "Error: %d" % (response.status_code,)

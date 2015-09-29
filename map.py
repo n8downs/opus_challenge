@@ -1,11 +1,11 @@
 import sys
-from sitecrawler import SiteCrawler
+from crawler import Crawler
 from svc import RealServiceProvider
 
 def main():
     domain = sys.argv[1]
     svc = RealServiceProvider()
-    crawler = SiteCrawler(svc, domain)
+    crawler = Crawler(svc, domain)
     print("Mapping %s" % (domain,))
     siteMap = crawler.map()
     for url, data in siteMap.items():
