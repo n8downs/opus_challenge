@@ -4,4 +4,4 @@ SCRIPTS_DIR=`dirname "$0"`
 
 cd $SCRIPTS_DIR/..
 
-python3 -m unittest discover -v --pattern=*test.py
+python3 -m unittest discover --pattern=*test.py
