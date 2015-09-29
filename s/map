@@ -1,0 +1,5 @@
+#!/bin/bash
+
+MAIN_DIR=`dirname "$0"`/..
+
+python3 $MAIN_DIR/map.py $1
