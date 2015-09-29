@@ -1,6 +1,6 @@
 import sys
 from crawler import Crawler
-from svc import RealServiceProvider
+from svc.RealServiceProvider import RealServiceProvider
 
 def main():
     domain = sys.argv[1]

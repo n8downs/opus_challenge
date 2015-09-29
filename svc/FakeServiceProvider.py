@@ -1,6 +1,8 @@
 from .ServiceProvider import ServiceProvider
 
 class FakeRobotFileParser:
+    _disallowed_urls = {}
+
     def __init__(self, url):
         self._url = url
 
@@ -8,20 +10,25 @@ class FakeRobotFileParser:
         pass
 
     def can_fetch(self, agent, url):
-        return True
+        return not FakeRobotFileParser._disallowed_urls.get(url, False)
 
 class FakeResponse:
     def __init__(self, args):
         self.text = args.get('text', '');
         self.status_code = args.get('status_code', 200);
+        self.url = args.get('finalUrl', None) or args["url"]
 
 class FakeRequests:
     def __init__(self):
         self._calls = []
         self._expectations = {}
 
-    def _expect(self, url, code, text):
-        self._expectations[url] = FakeResponse({"status_code": code, "text": text})
+    def _expect(self, url, code, text, finalUrl=None):
+        self._expectations[url] = FakeResponse({
+            "status_code": code,
+            "text": text,
+            "url": url,
+            "finalUrl": finalUrl})
 
     def get(self, url, headers={}):
         self._calls.append({"url": url, "headers": headers})
@@ -30,8 +37,11 @@ class FakeRequests:
         if not response:
             raise Exception("No request expectation set for: '%s'" % (url,))
 
-        del self._expectations[url]    
+        del self._expectations[url]
         return response
+
+    def _countExpectations(self):
+        return len(self._expectations)
 
 class FakeServiceProvider(ServiceProvider):
     def __init__(self):
