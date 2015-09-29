@@ -1,4 +1,6 @@
+from urllib.parse import urlparse
 from .ServiceProvider import ServiceProvider
+import requests
 
 class FakeRobotFileParser:
     _disallowed_urls = {}
@@ -18,10 +20,23 @@ class FakeResponse:
         self.status_code = args.get('status_code', 200);
         self.url = args.get('finalUrl', None) or args["url"]
 
+class FakeExceptionsModule:
+    def __init__(self):
+        class RequestException(IOError):
+            pass
+
+        class InvalidSchema(RequestException):
+            pass
+
+        self.RequestException = RequestException
+        self.InvalidSchema = InvalidSchema
+
 class FakeRequests:
     def __init__(self):
         self._calls = []
         self._expectations = {}
+
+        self.exceptions = FakeExceptionsModule()
 
     def _expect(self, url, code, text, finalUrl=None):
         self._expectations[url] = FakeResponse({
@@ -38,6 +53,10 @@ class FakeRequests:
             raise Exception("No request expectation set for: '%s'" % (url,))
 
         del self._expectations[url]
+
+        if urlparse(response.url).scheme not in ['http', 'https']:
+            raise self.exceptions.InvalidSchema("Unrecognized scheme: %s" % (response.url))
+
         return response
 
     def _countExpectations(self):

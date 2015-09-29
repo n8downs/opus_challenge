@@ -6,8 +6,11 @@ def main():
     domain = sys.argv[1]
     svc = RealServiceProvider()
     crawler = Crawler(svc, domain)
-    print("Mapping %s" % (domain,))
-    siteMap = crawler.map()
+    print("Mapping...")
+    siteMap = crawler.map(verbose=True)
+    print("Complete.")
+    print()
+    print("SiteMap:")
     for url, data in siteMap.items():
         print(url)
 

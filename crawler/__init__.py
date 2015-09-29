@@ -40,7 +40,11 @@ class Crawler:
         self.__robotParser.read()
 
     def __parseContents(self, url):
-        response = self.__svc.get('requests').get(url, headers={"User-Agent": self.__USER_AGENT, "Accept": "text/html"})
+        try:
+            response = self.__svc.get('requests').get(url, headers={"User-Agent": self.__USER_AGENT, "Accept": "text/html"})
+        except self.__svc.get('requests').exceptions.RequestException as e:
+            return {"error": "Error fetching url: %r" % (e,)}
+
         if response.status_code >= 400:
             return {"error": "Error fetching url. Response code: %d" % (response.status_code,)}
 
@@ -53,7 +57,7 @@ class Crawler:
 
         return result
 
-    def map(self):
+    def map(self, verbose=False):
         siteMap = {}
 
         parsedDomain = urlparse(self.__domain)
@@ -76,6 +80,8 @@ class Crawler:
                 siteMap[url] = {"error": "Disallowed by robots.txt"}
                 continue
 
+            if verbose:
+                print(".. %s" % (url,))
             contents = self.__parseContents(url)
 
             if contents.get("redirected_to", False):

@@ -147,6 +147,17 @@ class LinkTests(Fixture):
         siteMap = crawler.map()
         self.assertEqual({"http://example.com":{"error": "Error fetching url. Response code: 400"}}, siteMap)
 
+    def test_redirects_to_unknown_protocols_are_handled(self):
+        self.svc.get('requests')._expect(
+            "http://example.com",
+            200,
+            '<a href="https://www.example.com/foobar">click here</a>',
+            finalUrl="foo:bar")
+
+        crawler = Crawler(self.svc, "example.com")
+        siteMap = crawler.map()
+        self.assertEqual({"http://example.com":{"error": "Error fetching url: InvalidSchema('Unrecognized scheme: foo:bar',)"}}, siteMap)
+
 class AssetTests(Fixture):
     def test_image_src_is_captured_as_asset(self):
         self.svc.get('requests')._expect("http://example.com", 200, '<img src="/img/foo.png">')
