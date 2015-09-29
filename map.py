@@ -10,16 +10,15 @@ def main():
     siteMap = crawler.map()
     for url, data in siteMap.items():
         print(url)
-        if isinstance(data, str):
-            print('  %s' % (data,))
-            continue
 
-        print('  assets:')
-        for asset in data['assets']:
-            print('    %s' % (asset,))
-        print('  links:')
-        for link in data['links']:
-            print('    %s' % (link,))
+        for prop in ['error', 'original_url', 'redirects_to']:
+            if data.get(prop, False):
+                print('  %s: %s' % (prop, data[prop],))
+
+        for prop in ['assets', 'links']:
+            print('  %s:' % (prop,))
+            for p in data.get(prop, []):
+                print('    %s' % (p,))
 
 if __name__ == "__main__":
     main()

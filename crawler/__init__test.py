@@ -116,7 +116,20 @@ class LinkTests(Fixture):
         crawler = Crawler(self.svc, "example.com")
         siteMap = crawler.map()
         self.assertEqual({"https://www.example.com":{"original_url": "http://example.com", "assets":[], "links":["https://www.example.com/foobar"]},
-                          "https://www.example.com/foobar": {"assets": [], "links": []}}, siteMap)
+                          "https://www.example.com/foobar": {"assets": [], "links": []},
+                          "http://example.com": {"redirects_to": "https://www.example.com"}}, siteMap)
+
+    def test_dont_rerequest_a_redirect(self):
+        self.svc.get('requests')._expect(
+            "http://example.com",
+            200,
+            '<a href="http://example.com">click here</a>',
+            finalUrl="http://example.com/foo")
+
+        crawler = Crawler(self.svc, "example.com")
+        siteMap = crawler.map()
+        self.assertEqual({"http://example.com/foo":{"original_url": "http://example.com", "assets":[], "links":["http://example.com"]},
+                          "http://example.com": {"redirects_to": "http://example.com/foo"}}, siteMap)
 
     def test_disallowed_urls_are_not_fetched(self):
         self.svc.get('requests')._expect("http://example.com", 200, '<a href="http://example.com/admin">click here</a>')

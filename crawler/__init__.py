@@ -87,6 +87,8 @@ class Crawler:
                     self.__domain = url
                     parsedDomain = urlparse(self.__domain)
 
+                siteMap[contents["original_url"]] = {"redirects_to": url}
+
             siteMap[url] = contents
 
             for link in contents.get("links", []):
