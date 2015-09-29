@@ -1,7 +1,26 @@
 from urllib.parse import urljoin
+from html.parser import HTMLParser
+import requests
+
+class MyHTMLParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.assets = []
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a':
+            link = False
+            for attr in attrs:
+                name, value = attr
+                if name == 'href':
+                    link = value
+            if (link):
+                self.links.append(link)
+
 
 class SiteCrawler:
-    __USER_AGENT = 'SiteCrawler'
+    __USER_AGENT = 'SiteCrawlerBot/0.1'
 
     def __init__(self, svc, domain):
         self.__svc = svc
@@ -12,8 +31,18 @@ class SiteCrawler:
         self.__robotParser.read()
 
     def __parseContents(self, url):
-        parsed = {"assets": [], "links": []}
-        return parsed
+        response = requests.get(url, headers={"User-Agent": self.__USER_AGENT, "Accept": "text/html"})
+        if response.status_code >= 400:
+            pass
+            #return "Error: %d" % (response.status_code,)
+
+        print(response.status_code)
+        print(response.text)
+
+        parser = MyHTMLParser()
+        parser.feed(response.text)
+
+        return {"assets": parser.assets, "links": parser.links}
 
     def map(self):
         siteMap = {}

@@ -7,7 +7,19 @@ def main():
     svc = RealServiceProvider()
     crawler = SiteCrawler(svc, domain)
     print("Mapping %s" % (domain,))
-    print(crawler.map())
+    siteMap = crawler.map()
+    for url, data in siteMap.items():
+        print(url)
+        if isinstance(data, str):
+            print('  %s' % (data,))
+            continue
+
+        print('  assets:')
+        for asset in data['assets']:
+            print('    %s' % (asset,))
+        print('  links:')
+        for link in data['links']:
+            print('    %s' % (link,))
 
 if __name__ == "__main__":
     main()
