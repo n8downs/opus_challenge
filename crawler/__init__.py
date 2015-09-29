@@ -8,14 +8,23 @@ class MyHTMLParser(HTMLParser):
         self.links = []
 
     def handle_starttag(self, tag, attrs):
+        def findAttr(name):
+            found = False
+            for n, v in attrs:
+                if n == name:
+                    found = v
+            return found
+
         if tag == 'a':
-            link = False
-            for attr in attrs:
-                name, value = attr
-                if name == 'href':
-                    link = value
+            link = findAttr('href')
             if (link):
                 self.links.append(link)
+        else:
+            for t, a in [('img', 'src'), ('script', 'src'), ('link', 'href')]:
+                if t == tag:
+                    asset = findAttr(a)
+                    if asset:
+                        self.assets.append(asset)
 
 class Crawler:
     __USER_AGENT = 'SiteCrawlerBot/0.1'

@@ -2,13 +2,14 @@ import unittest
 from svc.FakeServiceProvider import FakeServiceProvider
 from crawler import Crawler
 
-class LinkTests(unittest.TestCase):
+class Fixture(unittest.TestCase):
     def setUp(self):
         self.svc = FakeServiceProvider()
 
     def tearDown(self):
         self.assertEqual(0, self.svc.get('requests')._countExpectations())
 
+class LinkTests(Fixture):
     def test_absolute_links_are_captured(self):
         self.svc.get('requests')._expect("http://example.com", 200, '<a href="http://example.com/foobar/">click here</a>')
         self.svc.get('requests')._expect("http://example.com/foobar/", 200, '')
@@ -133,8 +134,28 @@ class LinkTests(unittest.TestCase):
         siteMap = crawler.map()
         self.assertEqual({"http://example.com":{"error": "Error fetching url. Response code: 400"}}, siteMap)
 
-class AssetTests(unittest.TestCase):
-    pass
+class AssetTests(Fixture):
+    def test_image_src_is_captured_as_asset(self):
+        self.svc.get('requests')._expect("http://example.com", 200, '<img src="/img/foo.png">')
+
+        crawler = Crawler(self.svc, "http://example.com")
+        siteMap = crawler.map()
+        self.assertEqual({"http://example.com":{"assets":["/img/foo.png"], "links":[]}}, siteMap)
+
+    def test_script_src_is_captured_as_asset(self):
+        self.svc.get('requests')._expect("http://example.com", 200, '<script src="/js/foo.js"></script>')
+
+        crawler = Crawler(self.svc, "http://example.com")
+        siteMap = crawler.map()
+        self.assertEqual({"http://example.com":{"assets":["/js/foo.js"], "links":[]}}, siteMap)
+
+    def test_link_href_is_captured_as_asset(self):
+        self.svc.get('requests')._expect("http://example.com", 200, '<link href="/css/foo.css"></script>')
+
+        crawler = Crawler(self.svc, "http://example.com")
+        siteMap = crawler.map()
+        self.assertEqual({"http://example.com":{"assets":["/css/foo.css"], "links":[]}}, siteMap)
+
 
 
 if __name__ == '__main__':
